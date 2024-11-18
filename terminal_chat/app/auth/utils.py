@@ -3,6 +3,8 @@ import jwt
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from dotenv import main
+from jose import JWTError, jwt
+from fastapi import HTTPException, Depends
 
 main.load_dotenv()
 
@@ -28,3 +30,14 @@ def create_access_token(data: dict):
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
+
+def verify_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        raise HTTPException(status_code=403, detail="Could not validate credentials")
+
+def get_user_from_token(token: str):
+    payload = verify_token(token)
+    return payload.get("sub") 
