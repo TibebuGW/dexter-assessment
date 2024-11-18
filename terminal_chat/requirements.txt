@@ -8,3 +8,6 @@ passlib
 pydantic 
 python-decouple
 python-dotenv
+pyjwt
+httpx
+bcrypt

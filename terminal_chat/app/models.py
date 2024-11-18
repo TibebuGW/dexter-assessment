@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, Table
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Table, func
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
@@ -10,15 +10,19 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+    groups = relationship("Group", secondary="group_members", back_populates="members")
+
 
 # Messages Table
 class Message(Base):
     __tablename__ = "messages"
     id = Column(Integer, primary_key=True, index=True)
-    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    recipient_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # For 1-1 chat
-    group_id = Column(Integer, ForeignKey("groups.id"), nullable=True)  # For group chat
-    content = Column(String, nullable=False)
+    sender_id = Column(Integer, ForeignKey("users.id"))
+    receiver_id = Column(Integer, ForeignKey("users.id"))
+    content = Column(String, index=True)
+    timestamp = Column(DateTime, server_default=func.now())
+    sender = relationship("User", foreign_keys=[sender_id])
+    receiver = relationship("User", foreign_keys=[receiver_id])
 
 # Groups Table
 class Group(Base):
